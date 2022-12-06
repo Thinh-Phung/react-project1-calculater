@@ -26,12 +26,51 @@ function reducer(state, {type,payload}){
         ...state, 
         currentOperand: `${state.currentOperand || ""}${payload.digit}`
     }
+    case ACTIONS.CHOOSE_OPERATION:
+      if (state.currentOperand== null && state.previousOperand == null){
+        return state // chua bam so thi khong bam duoc phep tinh
+      }
+      if( state.previousOperand == null){ // sau khi bam phep tinh, rai state vao => ghep bieu tuong phep tinh vao(payload.operatio)=>xoa so da bam di (currentOperand:null)
+        return {
+          ...state,
+          operation: payload.operation, 
+          previousOperand: state.currentOperand,
+          currentOperand: null
+        }
+      }
+      return{//sau khi bam 2 so va phep tinh (vd:2+2) ma bam tiep phep tinh thi tinh ra bieu thuc 2+2 truoc
+        ...state,
+        previousOperand:evaluate(state),
+        operation:payload.operation,
+        currentOperand:null
+      }
     case ACTIONS.CLEAR:
       return{}
   }
+function evaluate({currentOperand, previousOperand, operation}){
+  const prev= parseFloat(previousOperand)// chuyen tu string sang float
+  const current= parseFloat(currentOperand)// chuyen tu string sang float
+  if(isNaN(prev) || isNaN(current)) return ""// neu phep tinh hien tai hoac phep tinh trc khong phai so tra ve ""
+  let computation =""
+  switch (operation){
+    case "+":
+      computation= prev + current
+      break
+    case "-":
+      computation= prev - current
+      break
+    case "*":
+      computation= prev * current
+      break
+    case "÷":
+      computation= prev / current
+      break
+  }
+  return computation.toString()// tra ve so dang chuoi
 }
+
 function App() {
-//4.DISPATCH
+//4.DISPATCH (state la 1 object)
   const [{currentOperand, previousOperand, operation},dispatch]=useReducer(
     reducer,
     {}
