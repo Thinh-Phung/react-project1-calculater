@@ -59,6 +59,22 @@ function reducer(state, {type,payload}){
       }
     case ACTIONS.CLEAR:
       return{}
+    case ACTIONS.DELETE_DIGIT:
+      if(state.overwrite){// neu dang hien ket qua ma bam DEL => xoa toan bo 
+        return{
+          ...state,
+          overwrite: false,
+          currentOperand:null
+        }
+      }
+      if (state.currentOperand == null) return state//khong nhap gi bam del giu nguyen state
+      if(state.currentOperand.length === 1){
+        return {...state, currentOperand: null}// neu con 1 chu so bam del => xoa het toan bo
+      }
+      return{
+        ...state,
+        currentOperand: state.currentOperand.slice(0,-1)// slice tra ve 1 mang lay tu [0,-1) 0->-2
+      }
     case ACTIONS.EVALUATE:
       if(
         state.operation == null ||
@@ -67,13 +83,12 @@ function reducer(state, {type,payload}){
         ) {
           return state// khi chua bam gi ma bam = tra ve state hien tai
       }
-
       return{
         ...state,
         overwrite:true,
-        previousOperand: null,
-        operation: null,
-        currentOperand: evaluate(state),
+        previousOperand: null,//xoa Operand trc do ko hien thi
+        operation: null,// xoa phep tinh
+        currentOperand: evaluate(state),// hien thi ket qua
       }
   }
 }
@@ -112,7 +127,7 @@ function App() {
         <div className='current-operand'>{currentOperand}</div>
       </div>
       <button className='span-two' onClick={()=> dispatch({type:ACTIONS.CLEAR})}>AC</button>
-      <button>DEL</button>
+      <button onClick={()=> dispatch({type:ACTIONS.DELETE_DIGIT})}>DEL</button>
       <OperationButton operation="÷" dispatch={dispatch} /> 
       <DigitButton digit="1" dispatch={dispatch} />
       <DigitButton digit="2" dispatch={dispatch} />
