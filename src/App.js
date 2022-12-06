@@ -9,13 +9,20 @@ export const ACTIONS ={
   CHOOSE_OPERATION: 'choose-operation',
   CLEAR:'clear',
   DELETE_DIGIT: 'delete-digit',
-  EVALUTE:'evaluate'
+  EVALUATE:'evaluate'
 }
 
 //3.REDUCER
 function reducer(state, {type,payload}){
   switch(type){
     case  ACTIONS.ADD_DIGIT:
+      if(state.overwrite){// sau khi thuc hien phep tinh =>ket qua => bam so tiep thi ghi de len 
+        return{
+          ...state,
+          currentOperand: payload.digit,
+          overwrite: false,
+        }
+      }
       if(payload.digit === "0"&& state.currentOperand==="0") {
         return state //khong them nhieu so 0 o dau( tra lai state hien tai) 
       }
@@ -27,8 +34,14 @@ function reducer(state, {type,payload}){
         currentOperand: `${state.currentOperand || ""}${payload.digit}`
     }
     case ACTIONS.CHOOSE_OPERATION:
-      if (state.currentOperand== null && state.previousOperand == null){
+      if (state.currentOperand == null && state.previousOperand == null){
         return state // chua bam so thi khong bam duoc phep tinh
+      }
+      if (state.currentOperand== null){// doi phep tinh (vd: bam + sau do bam - thi doi thanh phep -)
+        return{
+          ...state,
+          operation: payload.operation,
+        }
       }
       if( state.previousOperand == null){ // sau khi bam phep tinh, rai state vao => ghep bieu tuong phep tinh vao(payload.operatio)=>xoa so da bam di (currentOperand:null)
         return {
@@ -46,7 +59,24 @@ function reducer(state, {type,payload}){
       }
     case ACTIONS.CLEAR:
       return{}
+    case ACTIONS.EVALUATE:
+      if(
+        state.operation == null ||
+        state.currentOperand == null||
+        state.previousOperand == null 
+        ) {
+          return state// khi chua bam gi ma bam = tra ve state hien tai
+      }
+
+      return{
+        ...state,
+        overwrite:true,
+        previousOperand: null,
+        operation: null,
+        currentOperand: evaluate(state),
+      }
   }
+}
 function evaluate({currentOperand, previousOperand, operation}){
   const prev= parseFloat(previousOperand)// chuyen tu string sang float
   const current= parseFloat(currentOperand)// chuyen tu string sang float
@@ -98,8 +128,10 @@ function App() {
       <OperationButton operation="-" dispatch={dispatch} /> 
       <DigitButton digit="." dispatch={dispatch} />
       <DigitButton digit="0" dispatch={dispatch} />
-      <button className='span-two'>=</button>
+      <button className='span-two'
+      onClick={()=> dispatch({type:ACTIONS.EVALUATE})}>=</button>
     </div>
   )
 }
+
 export default App;
