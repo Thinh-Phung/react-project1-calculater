@@ -114,17 +114,27 @@ function evaluate({currentOperand, previousOperand, operation}){
   return computation.toString()// tra ve so dang chuoi de hien thi
 }
 
+const INTEGER_FORMATTER = new Intl.NumberFormat("en-us",{
+  maximumFractionDigits: 0,// chon kieu format
+})
+function formatOperand(operand){
+  if(operand == null) return // khong co so thi khong lam gi ca
+  const [integer,decimal] = operand.split('.')// tach phan nguyen va phan thap phan khi co dau "."
+  if(decimal == null) return INTEGER_FORMATTER.format(integer)//neu phan thap phan = null hien thi so nguyen
+  return `${INTEGER_FORMATTER.format(integer)}.${decimal}` // ghep phan nguyen va thap phan thanh chuoi de hien thi
+}
 function App() {
 //4.DISPATCH (state la 1 object)
   const [{currentOperand, previousOperand, operation},dispatch]=useReducer(
     reducer,
-    {}
+    {}// init state la object rong
   )
   return (
     <div className="calculator-grid">
       <div className="output">
-        <div className='previous-operand'>{previousOperand}{operation}</div>
-        <div className='current-operand'>{currentOperand}</div>
+        <div className='previous-operand'>
+          {formatOperand(previousOperand)}{operation}</div>
+        <div className='current-operand'>{formatOperand(currentOperand)}</div>
       </div>
       <button className='span-two' onClick={()=> dispatch({type:ACTIONS.CLEAR})}>AC</button>
       <button onClick={()=> dispatch({type:ACTIONS.DELETE_DIGIT})}>DEL</button>
