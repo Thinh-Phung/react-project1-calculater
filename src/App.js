@@ -111,7 +111,7 @@ function evaluate({currentOperand, previousOperand, operation}){
       computation= prev / current
       break
   }
-  return computation.toString()// tra ve so dang chuoi
+  return computation.toString()// tra ve so dang chuoi de hien thi
 }
 
 function App() {
